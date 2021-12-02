@@ -2,7 +2,8 @@ const fs = require("fs");
 const logic = require("./logic");
 
 try {
-  const data = fs.readFileSync("./input.txt", "utf8");
+  const rawData = fs.readFileSync("./input.txt", "utf8");
+  const data = rawData.split("\n");
 
   logic(data);
 } catch (e) {
