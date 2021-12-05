@@ -1,20 +1,62 @@
 module.exports = (data) => {
-  const input = data.map((record) =>
+  const inputs = data.map((record) =>
     record.split("").map((digit) => parseInt(digit, 2))
   );
+  const inputSize = inputs[0].length;
 
-  const ratios = input.reduce(
-    (state, value) => state.map((ratio, i) => ratio + value[i]),
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-  );
+  // Most common
+  let filteredInputs = inputs;
+  for (let position = 0; position < inputSize; position++) {
+    console.log(filteredInputs);
 
-  const gamma = ratios
-    .map((ratio) => (ratio > input.length / 2 ? 1 : 0))
-    .join("");
+    const mostCommon =
+      filteredInputs.reduce(
+        (sum, input) => sum + parseInt(input[position], 2),
+        0
+      ) >=
+      filteredInputs.length / 2
+        ? 1
+        : 0;
 
-  const epsilon = ratios
-    .map((ratio) => (ratio < input.length / 2 ? 1 : 0))
-    .join("");
+    console.log("Most common: ", mostCommon);
 
-  console.log(parseInt(gamma, 2) * parseInt(epsilon, 2));
+    filteredInputs = filteredInputs.filter(
+      (input) => input[position] === mostCommon
+    );
+
+    if (filteredInputs.length <= 1) {
+      break;
+    }
+  }
+
+  const oxygenGeneratorRating = parseInt(filteredInputs[0].join(""), 2);
+
+  // Least common
+  filteredInputs = inputs;
+  for (let position = 0; position < inputSize; position++) {
+    console.log(filteredInputs);
+
+    const leastCommon =
+      filteredInputs.reduce(
+        (sum, input) => sum + parseInt(input[position], 2),
+        0
+      ) <
+      filteredInputs.length / 2
+        ? 1
+        : 0;
+
+    console.log("Least common: ", leastCommon);
+
+    filteredInputs = filteredInputs.filter(
+      (input) => input[position] === leastCommon
+    );
+
+    if (filteredInputs.length <= 1) {
+      break;
+    }
+  }
+
+  const co2scrubberRating = parseInt(filteredInputs[0].join(""), 2);
+
+  console.log(oxygenGeneratorRating * co2scrubberRating);
 };
