@@ -34,6 +34,16 @@ const isWinningBoard = (board) => {
   return false;
 };
 
+const logBoard = (board) => {
+  console.log(
+    board.map((row) =>
+      row.map((element) =>
+        element.selected ? `*${element.value}*` : ` ${element.value} `
+      )
+    )
+  );
+};
+
 module.exports = (data) => {
   console.log("Preparing the data...");
 
@@ -54,6 +64,7 @@ module.exports = (data) => {
   );
 
   console.log("Finding the winner...");
+  const winningBoards = [];
 
   for (let answer of answers) {
     console.log("Answer: ", answer);
@@ -71,20 +82,19 @@ module.exports = (data) => {
       )
     );
 
-    const winningBoards = boards.filter(isWinningBoard);
+    const newWinningBoards = boards.filter(isWinningBoard);
 
-    if (winningBoards.length) {
-      console.log("Winner!\n");
+    boards = boards.filter((board) => !isWinningBoard(board));
+    winningBoards.push(...newWinningBoards);
 
-      console.log(
-        winningBoards[0].map((row) =>
-          row.map((element) =>
-            element.selected ? `*${element.value}*` : ` ${element.value} `
-          )
-        )
-      );
+    console.log("Boards:", boards.length, winningBoards.length);
 
-      const score = winningBoards[0].reduce(
+    if (boards.length <= 0) {
+      console.log("done!");
+
+      logBoard(newWinningBoards[0]);
+
+      const score = newWinningBoards[0].reduce(
         (sum, row) =>
           sum +
           row.reduce(
