@@ -1,113 +1,65 @@
-const convertToInt = (n) => parseInt(n, 10);
+const processData = (data) =>
+  data
+    .map((row) => row.split(" -> "))
+    .map(([start, end]) => ({
+      start: start.split(",").map((n) => parseInt(n, 10)),
+      end: end.split(",").map((n) => parseInt(n, 10)),
+    }))
+    .map(({ start, end }) => {
+      const steps = [];
 
-const sliceArray = (arr, separator) => {
-  const results = [];
+      if (start[0] === end[0]) {
+        let step = [...start];
 
-  arr.forEach((row) => {
-    if (row === separator || !results.length) {
-      results.push([]);
+        while (step[1] !== end[1]) {
+          steps.push([...step]);
+          step[1] += step[1] < end[1] ? 1 : -1;
+        }
+        steps.push(end);
+      } else if (start[1] === end[1]) {
+        let step = [...start];
+
+        while (step[0] !== end[0]) {
+          steps.push([...step]);
+          step[0] += step[0] < end[0] ? 1 : -1;
+        }
+        steps.push(end);
+      } else {
+        console.log(`Invalid input: ${start}, ${end}`);
+      }
+
+      return steps;
+    })
+    .filter((row) => row.length > 0);
+
+const prepareMap = (size) => {
+  const map = [];
+  for (let i = 0; i < size; i++) {
+    const row = [];
+    for (let j = 0; j < size; j++) {
+      row.push(0);
     }
-
-    if (row !== separator) {
-      results[results.length - 1].push(row);
-    }
-  });
-
-  return results;
-};
-
-const isWinningBoard = (board) => {
-  const noOfColumns = board[0].length;
-
-  // Columns
-  for (let i = 0; i < noOfColumns; i++) {
-    if (board.every((row) => row[i].selected)) {
-      return true;
-    }
+    map.push(row);
   }
 
-  // Rows
-  if (board.some((row) => row.every((element) => element.selected))) {
-    return true;
-  }
-
-  return false;
-};
-
-const logBoard = (board) => {
-  console.log(
-    board.map((row) =>
-      row.map((element) =>
-        element.selected ? `*${element.value}*` : ` ${element.value} `
-      )
-    )
-  );
+  return map;
 };
 
 module.exports = (data) => {
-  console.log("Preparing the data...");
+  const input = processData(data);
 
-  const [answersRaw, ...boardsRaw] = data;
+  const map = prepareMap(1000);
 
-  const answers = answersRaw.split(",").map(convertToInt);
-  let boards = sliceArray(boardsRaw, "").map((board) =>
-    board.map((row) =>
-      row
-        .split(" ")
-        .filter((element) => element !== "")
-        .map(convertToInt)
-        .map((value) => ({
-          value,
-          selected: false,
-        }))
-    )
+  input.forEach((row) => {
+    row.forEach(([x, y]) => {
+      map[x][y] += 1;
+    });
+  });
+
+  const count = map.reduce(
+    (sum, row) => sum + row.reduce((rowSum, e) => rowSum + (e > 1 ? 1 : 0), 0),
+    0
   );
 
-  console.log("Finding the winner...");
-  const winningBoards = [];
-
-  for (let answer of answers) {
-    console.log("Answer: ", answer);
-
-    boards = boards.map((board) =>
-      board.map((row) =>
-        row.map((element) =>
-          element.value === answer
-            ? {
-                ...element,
-                selected: true,
-              }
-            : element
-        )
-      )
-    );
-
-    const newWinningBoards = boards.filter(isWinningBoard);
-
-    boards = boards.filter((board) => !isWinningBoard(board));
-    winningBoards.push(...newWinningBoards);
-
-    console.log("Boards:", boards.length, winningBoards.length);
-
-    if (boards.length <= 0) {
-      console.log("done!");
-
-      logBoard(newWinningBoards[0]);
-
-      const score = newWinningBoards[0].reduce(
-        (sum, row) =>
-          sum +
-          row.reduce(
-            (rowSum, element) =>
-              rowSum + (!element.selected ? element.value : 0),
-            0
-          ),
-        0
-      );
-
-      console.log("Score: ", score * answer);
-
-      break;
-    }
-  }
+  return count;
 };
