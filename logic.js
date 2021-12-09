@@ -25,7 +25,14 @@ const processData = (data) =>
         }
         steps.push(end);
       } else {
-        console.log(`Invalid input: ${start}, ${end}`);
+        let step = [...start];
+
+        while (step[0] !== end[0] && step[1] !== end[1]) {
+          steps.push([...step]);
+          step[0] += step[0] < end[0] ? 1 : -1;
+          step[1] += step[1] < end[1] ? 1 : -1;
+        }
+        steps.push(end);
       }
 
       return steps;
