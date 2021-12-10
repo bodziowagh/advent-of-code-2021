@@ -1,50 +1,17 @@
 const convertToNumber = (n) => parseInt(n, 10);
 
-const processData = (data) => [
-  data[0].split(",").map(convertToNumber),
-  convertToNumber(data[1]),
-];
+const processData = (data) => data[0].split(",").map(convertToNumber);
 
-const FISH_INITIAL_TIEMOUT = 9;
-const FISH_TIEMOUT = 7;
+const findMedianPostition = (input) =>
+  input.sort((a, b) => a - b)[Math.round(input.length / 2)];
 
-const prepareGroups = (input) => {
-  const groups = [];
-
-  input.forEach((fish) => {
-    const i = groups.findIndex((f) => f.value === fish);
-
-    if (i >= 0) {
-      groups[i].count += 1;
-    } else {
-      groups.push({
-        value: fish,
-        count: 1,
-      });
-    }
-  });
-
-  return groups;
-};
-
-const getCount = (days, initialState) => {
-  let count = 1;
-
-  if (days > initialState) {
-    count =
-      getCount(days - initialState, FISH_TIEMOUT) +
-      getCount(days - initialState, FISH_INITIAL_TIEMOUT);
-  }
-
-  return count;
-};
+const calculateFuel = (crabs, position) =>
+  crabs.reduce((fuel, crab) => fuel + Math.abs(crab - position), 0);
 
 module.exports = (data) => {
-  const [input, days] = processData(data);
-  const groups = prepareGroups(input);
+  const input = processData(data);
 
-  return groups.reduce(
-    (sum, { count, value }) => sum + count * getCount(days, value),
-    0
-  );
+  const mostCommonPosition = findMedianPostition(input);
+
+  return calculateFuel(input, mostCommonPosition);
 };
