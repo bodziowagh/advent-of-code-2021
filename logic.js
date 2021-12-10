@@ -1,33 +1,50 @@
 const convertToNumber = (n) => parseInt(n, 10);
 
-const processData = (data) => data[0].split(",").map(convertToNumber);
+const processData = (data) => [
+  data[0].split(",").map(convertToNumber),
+  convertToNumber(data[1]),
+];
 
-const FISH_INITIAL_TIEMOUT = 8;
-const FISH_TIEMOUT = 6;
-const NO_OF_DAYS = 80;
+const FISH_INITIAL_TIEMOUT = 9;
+const FISH_TIEMOUT = 7;
 
-const iterate = (state) => {
-  const result = [];
+const prepareGroups = (input) => {
+  const groups = [];
 
-  state.forEach((fish) => {
-    if (fish > 0) {
-      result.push(fish - 1);
+  input.forEach((fish) => {
+    const i = groups.findIndex((f) => f.value === fish);
+
+    if (i >= 0) {
+      groups[i].count += 1;
     } else {
-      result.push(FISH_TIEMOUT);
-      result.push(FISH_INITIAL_TIEMOUT);
+      groups.push({
+        value: fish,
+        count: 1,
+      });
     }
   });
 
-  return result;
+  return groups;
+};
+
+const getCount = (days, initialState) => {
+  let count = 1;
+
+  if (days > initialState) {
+    count =
+      getCount(days - initialState, FISH_TIEMOUT) +
+      getCount(days - initialState, FISH_INITIAL_TIEMOUT);
+  }
+
+  return count;
 };
 
 module.exports = (data) => {
-  const input = processData(data);
+  const [input, days] = processData(data);
+  const groups = prepareGroups(input);
 
-  let state = input;
-  for (let i = 0; i < NO_OF_DAYS; i++) {
-    state = iterate(state);
-  }
-
-  return state.length;
+  return groups.reduce(
+    (sum, { count, value }) => sum + count * getCount(days, value),
+    0
+  );
 };
